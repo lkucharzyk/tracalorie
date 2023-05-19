@@ -44,6 +44,18 @@ class CalorieTracker{
         this._renderStats();
     }
 
+    reset(){
+        this._totalCalories = 0;
+        this._meals = [];
+        this._workouts = [];
+        this._renderStats();
+    }
+
+    setLimit(limit){
+        this._calorieLimit = limit;
+        this._renderStats();
+    }
+
     _displayCaloriesTotal(){
         const totalCalEl = document.getElementById('calories-total');
         totalCalEl.innerText = this._totalCalories;
@@ -181,6 +193,13 @@ class App{
 
         document.getElementById('meal-items').addEventListener('click', this._removeItem.bind(this, 'meal'));
         document.getElementById('workout-items').addEventListener('click', this._removeItem.bind(this, 'workout'));
+
+        document.getElementById('filter-meals').addEventListener('keyup', this._filterItems.bind(this));
+        document.getElementById('filter-workouts').addEventListener('keyup', this._filterItems.bind(this));
+
+        document.getElementById('reset').addEventListener('click', this._reset.bind(this));
+
+        document.getElementById('limit-form').addEventListener('submit', this._setLimit.bind(this));
     }
 
     _newItem(type, e){
@@ -223,6 +242,45 @@ class App{
             } 
         }
         
+    }
+
+    _filterItems(e){
+        const input = e.target.value.toLowerCase();
+        let items;
+        e.target.getAttribute('id') === 'filter-meals' ? items = document.querySelectorAll('#meal-items h4') : items = document.querySelectorAll('#workout-items h4');
+        items.forEach(item =>{
+            if(!item.innerHTML.toLowerCase().startsWith(input)){
+                item.parentNode.parentNode.parentNode.style.display = 'none';
+            }else{
+                item.parentNode.parentNode.parentNode.style.display = 'flex';
+            }
+        })
+    }
+
+    _setLimit(e){
+        e.preventDefault();
+        const limitField = document.getElementById('limit');
+
+        if(limitField.value === ''){
+            alert('please fill in field');
+            return;
+        }
+        this._tracker.setLimit(+limitField.value);
+        limitField.value = '';
+
+        const modalEl = document.getElementById('limit-modal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+    }
+
+    _reset(){
+        this._tracker.reset();
+
+        document.getElementById('meal-items').innerHTML = '';
+        document.getElementById('workout-items').innerHTML = '';
+
+        document.getElementById('filter-meals').value = '';
+        document.getElementById('filter-workouts').value = '';
     }
 
 }
